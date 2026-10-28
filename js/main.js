@@ -1,5 +1,13 @@
 var VIDEO_BUCKET = 'family-videos';
 var VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+var PHOTO_BUCKET = 'family-photos';
+var PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+var PHOTO_MAX_FILES = 10;
+var PHOTO_TYPES = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp'
+};
 var VIDEO_TYPES = {
   'video/mp4': 'mp4',
   'video/webm': 'webm',
@@ -53,6 +61,25 @@ function appendPost(container, post, client) {
   container.appendChild(article);
 }
 
+function appendPhoto(container, post, client) {
+  var article = document.createElement('article');
+  article.className = 'photo-item';
+  var imageUrl = client.storage.from(PHOTO_BUCKET).getPublicUrl(post.video_path).data.publicUrl;
+  var image = document.createElement('img');
+  image.src = imageUrl;
+  image.alt = post.title;
+  image.dataset.full = imageUrl;
+  image.loading = 'lazy';
+  article.appendChild(image);
+  if (post.author_name) {
+    var caption = document.createElement('p');
+    caption.className = 'post-meta';
+    caption.textContent = post.author_name;
+    article.appendChild(caption);
+  }
+  container.appendChild(article);
+}
+
 async function loadPosts(client, container, kind) {
   try {
     var query = client.from('content_posts').select('id, kind, title, body, author_name, video_path, created_at')
@@ -88,6 +115,24 @@ async function loadVideos(client, container) {
     result.data.forEach(function(post) { appendPost(container, post, client); });
   } catch (error) {
     container.textContent = 'Could not load videos: ' + error.message;
+    container.classList.add('error');
+  }
+}
+
+async function loadPhotos(client, container) {
+  try {
+    var result = await client.from('content_posts')
+      .select('id, kind, title, author_name, video_path, created_at')
+      .eq('kind', 'photo').order('created_at', { ascending: false });
+    if (result.error) throw result.error;
+    container.replaceChildren();
+    if (result.data.length === 0) {
+      container.textContent = 'No photos have been uploaded yet.';
+      return;
+    }
+    result.data.forEach(function(post) { appendPhoto(container, post, client); });
+  } catch (error) {
+    container.textContent = 'Could not load photos: ' + error.message;
     container.classList.add('error');
   }
 }
@@ -183,6 +228,67 @@ function wireVideoForm(client, form) {
   });
 }
 
+function wirePhotoForm(client, form) {
+  form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    var status = form.querySelector('.form-status');
+    var button = form.querySelector('button[type="submit"]');
+    var files = Array.from(form.elements.photos.files);
+    var authorName = form.elements.author_name.value.trim() || null;
+    if (files.length === 0 || files.length > PHOTO_MAX_FILES) {
+      setStatus(status, 'Choose between 1 and 10 photos to upload.', true);
+      return;
+    }
+    for (var file of files) {
+      if (!Object.prototype.hasOwnProperty.call(PHOTO_TYPES, file.type)) {
+        setStatus(status, file.name + ' is not a supported photo. Choose JPG, PNG, or WebP files.', true);
+        return;
+      }
+      if (file.size === 0 || file.size > PHOTO_MAX_BYTES) {
+        setStatus(status, file.name + ' must be larger than 0 bytes and no larger than 10 MB.', true);
+        return;
+      }
+    }
+    button.disabled = true;
+    var published = 0;
+    setStatus(status, 'Uploading photos… (0 of ' + files.length + ')', false);
+    try {
+      for (var photo of files) {
+        var path = 'photos/' + crypto.randomUUID() + '.' + PHOTO_TYPES[photo.type];
+        var upload = await client.storage.from(PHOTO_BUCKET).upload(path, photo, {
+          contentType: photo.type,
+          upsert: false
+        });
+        if (upload.error) throw upload.error;
+        var result = await client.from('content_posts').insert({
+          kind: 'photo',
+          title: photo.name.replace(/\.[^.]+$/, '').slice(0, 120) || 'Family photo',
+          author_name: authorName,
+          body: '',
+          video_path: path
+        });
+        if (result.error) {
+          throw new Error('Photo uploaded but its post could not be saved: ' + result.error.message + ' Contact the site administrator to remove the unused upload.');
+        }
+        published++;
+        setStatus(status, 'Uploading photos… (' + published + ' of ' + files.length + ')', false);
+      }
+      form.reset();
+      setStatus(status, published + (published === 1 ? ' photo' : ' photos') + ' uploaded and published successfully.', false);
+      var list = document.querySelector('[data-photo-list]');
+      if (list) await loadPhotos(client, list);
+    } catch (error) {
+      var message = 'Could not upload photo' + (published === 1 ? '' : 's') + ': ' + error.message;
+      if (published > 0) message += ' ' + published + ' photo' + (published === 1 ? ' was' : 's were') + ' already published.';
+      setStatus(status, message, true);
+      var photoList = document.querySelector('[data-photo-list]');
+      if (photoList && published > 0) await loadPhotos(client, photoList);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   var navToggle = document.getElementById('navToggle');
   var mainNav = document.getElementById('mainNav');
@@ -195,17 +301,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  var galleryImgs = document.querySelectorAll('.gallery img');
+  var gallery = document.querySelector('.gallery');
   var lightbox = document.getElementById('lightbox');
   var lightboxImage = document.getElementById('lbImg');
   var closeLightbox = document.getElementById('closeLb');
-  if (galleryImgs.length && lightbox && lightboxImage) {
-    galleryImgs.forEach(function(image) {
-      image.addEventListener('click', function() {
-        lightboxImage.src = image.dataset.full || image.src;
-        lightboxImage.alt = image.alt;
-        lightbox.hidden = false;
-      });
+  if (gallery && lightbox && lightboxImage) {
+    gallery.addEventListener('click', function(event) {
+      var image = event.target.closest('img');
+      if (!image || !gallery.contains(image)) return;
+      lightboxImage.src = image.dataset.full || image.src;
+      lightboxImage.alt = image.alt;
+      lightbox.hidden = false;
     });
     if (closeLightbox) {
       closeLightbox.addEventListener('click', function() {
@@ -221,8 +327,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  var lists = Array.from(document.querySelectorAll('[data-post-list], [data-video-list]'));
-  var forms = Array.from(document.querySelectorAll('[data-post-form], [data-video-form]'));
+  var lists = Array.from(document.querySelectorAll('[data-post-list], [data-video-list], [data-photo-list]'));
+  var forms = Array.from(document.querySelectorAll('[data-post-form], [data-video-form], [data-photo-form]'));
   if (!lists.length && !forms.length) return;
   var client;
   try {
@@ -233,17 +339,19 @@ document.addEventListener('DOMContentLoaded', function() {
       list.classList.add('error');
     });
     forms.forEach(function(form) {
-      setStatus(form.querySelector('.form-status'), error.message, true);
+      if (form.querySelector('.form-status')) setStatus(form.querySelector('.form-status'), error.message, true);
       form.querySelector('button[type="submit"]').disabled = true;
     });
     return;
   }
   lists.forEach(function(list) {
     if (list.hasAttribute('data-video-list')) loadVideos(client, list);
+    else if (list.hasAttribute('data-photo-list')) loadPhotos(client, list);
     else loadPosts(client, list, list.dataset.postList);
   });
   forms.forEach(function(form) {
     if (form.hasAttribute('data-video-form')) wireVideoForm(client, form);
+    else if (form.hasAttribute('data-photo-form')) wirePhotoForm(client, form);
     else wirePostForm(client, form);
   });
 });
