@@ -10,32 +10,41 @@
   <header class="site-header">
     <div class="container">
       <h1><a href="index.html">Muchina Family</a></h1>
-      <nav class="main-nav">
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+      <nav id="mainNav" class="main-nav">
         <a href="index.html">Home</a>
         <a href="announcements.html">Announcements</a>
         <a href="entertainment.html">Entertainment</a>
-        <a href="ideas.html">Share Ideas</a>
+        <a href="ideas.html" aria-current="page">Share Ideas</a>
       </nav>
     </div>
   </header>
 
   <main class="container">
     <h2>Share Your Ideas</h2>
-    <p>Got an idea for an event, recipe, or family project? Send it to the group.</p>
-
+    <p>Have an idea for an event, recipe, or family project? Post it for everyone to see.</p>
     <section class="panel">
-      <h3>Quick submission</h3>
-      <p>Email: <a href="mailto:ideas@muchina-family.example.com">ideas@muchina-family.example.com</a></p>
-      <p>Or create an issue in this repo so others can comment and collaborate.</p>
+      <h3>Post an idea</h3>
+      <form data-post-form data-kind="idea">
+        <label for="idea-name">Your name (optional)</label>
+        <input id="idea-name" name="author_name" type="text" maxlength="80" autocomplete="name" />
+        <label for="idea-title">Idea title</label>
+        <input id="idea-title" name="title" type="text" maxlength="120" required />
+        <label for="idea-body">Tell us about your idea</label>
+        <textarea id="idea-body" name="body" rows="5" maxlength="2000" required></textarea>
+        <button class="btn" type="submit">Share idea</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="ideas-heading">
+      <h3 id="ideas-heading">Ideas from the family</h3>
+      <div data-post-list="idea" aria-live="polite"><p>Loading ideas…</p></div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>© Muchina Family</p>
-    </div>
-  </footer>
-
+  <footer class="site-footer"><div class="container"><p>© Muchina Family</p></div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

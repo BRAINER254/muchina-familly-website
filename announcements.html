@@ -10,9 +10,10 @@
   <header class="site-header">
     <div class="container">
       <h1><a href="index.html">Muchina Family</a></h1>
-      <nav class="main-nav">
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+      <nav id="mainNav" class="main-nav">
         <a href="index.html">Home</a>
-        <a href="announcements.html">Announcements</a>
+        <a href="announcements.html" aria-current="page">Announcements</a>
         <a href="entertainment.html">Entertainment</a>
         <a href="ideas.html">Share Ideas</a>
       </nav>
@@ -21,36 +22,29 @@
 
   <main class="container">
     <h2>Announcements</h2>
-    <section class="list">
-      <article class="item">
-        <h3>Prince Finishes His Exams</h3>
-        <time datetime="2026-10-30">Friday, October 30, 2026</time>
-        <p>Prince is finishing his exams on Friday, October 30. Congratulations, Prince!</p>
-      </article>
-      <article class="item">
-        <h3>Family Reunion 2027</h3>
-        <time datetime="2027-07-10">July 10, 2027</time>
-        <p>Planning in progress — volunteers welcome.</p>
-      </article>
-      <article class="item">
-        <h3>Monthly Zoom</h3>
-        <time datetime="2026-11-01">Next: Nov 1, 2026</time>
-        <p>Contact: family-organizer@example.com for the link.</p>
-      </article>
-    </section>
-
+    <p>Share family news with everyone. Announcements are published as soon as you submit them.</p>
     <section class="panel">
       <h3>Post an announcement</h3>
-      <p>To add an announcement, email <a href="mailto:family-organizer@example.com">family-organizer@example.com</a> or open a PR to update announcements.html in the repository.</p>
+      <form data-post-form data-kind="announcement">
+        <label for="announcement-name">Your name (optional)</label>
+        <input id="announcement-name" name="author_name" type="text" maxlength="80" autocomplete="name" />
+        <label for="announcement-title">Announcement title</label>
+        <input id="announcement-title" name="title" type="text" maxlength="120" required />
+        <label for="announcement-body">Details</label>
+        <textarea id="announcement-body" name="body" rows="5" maxlength="2000" required></textarea>
+        <button class="btn" type="submit">Publish announcement</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="announcements-heading">
+      <h3 id="announcements-heading">Recent announcements</h3>
+      <div data-post-list="announcement" aria-live="polite"><p>Loading announcements…</p></div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>© Muchina Family</p>
-    </div>
-  </footer>
-
+  <footer class="site-footer"><div class="container"><p>© Muchina Family</p></div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
