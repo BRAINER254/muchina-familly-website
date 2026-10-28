@@ -29,14 +29,7 @@
     <section class="panel">
       <h3>Latest Announcements</h3>
       <div class="cards">
-        <article class="card">
-          <h4>Family Reunion 2027</h4>
-          <p>Date: July 10, 2027 — Venue to be confirmed. See Announcements for details.</p>
-        </article>
-        <article class="card">
-          <h4>Monthly Zoom</h4>
-          <p>Next meeting: 1st Sunday of the month. Link posted on announcements page.</p>
-        </article>
+        <div data-post-list="announcement" data-limit="3" aria-live="polite"><p>Loading announcements…</p></div>
       </div>
       <p><a class="btn" href="announcements.html">All announcements →</a></p>
     </section>
@@ -57,10 +50,12 @@
   <footer class="site-footer">
     <div class="container">
       <p>© Muchina Family</p>
-      <p>To contribute content, edit the site files or open a PR in the repo.</p>
+      <p>Share announcements, ideas, and videos directly on the site.</p>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
