@@ -29,6 +29,7 @@ button{font:inherit}
 .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.5rem}
 .gallery img{width:100%;height:auto;border-radius:6px;cursor:pointer}
 .lightbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);}
+.lightbox[hidden]{display:none}
 .lightbox img{max-width:90%;max-height:80%;border-radius:6px}
 .close{position:absolute;top:1rem;right:1rem;background:#fff;border:0;padding:.5rem;border-radius:50%}
 @media(max-width:700px){.main-nav{display:none}.nav-toggle{display:block;margin-left:auto}}
