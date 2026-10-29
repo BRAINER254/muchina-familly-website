@@ -1,5 +1,17 @@
 var VIDEO_BUCKET = 'family-videos';
 var VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+var MUSIC_BUCKET = 'family-music';
+var MUSIC_MAX_BYTES = 20 * 1024 * 1024;
+var MUSIC_TYPES = {
+  'audio/mpeg': 'mp3',
+  'audio/mp4': 'm4a',
+  'audio/x-m4a': 'm4a',
+  'audio/ogg': 'ogg',
+  'audio/wav': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/wave': 'wav',
+  'audio/vnd.wave': 'wav'
+};
 var PHOTO_BUCKET = 'family-photos';
 var PHOTO_MAX_BYTES = 10 * 1024 * 1024;
 var PHOTO_MAX_FILES = 10;
@@ -43,6 +55,13 @@ function appendPost(container, post, client) {
     video.src = client.storage.from(VIDEO_BUCKET).getPublicUrl(post.video_path).data.publicUrl;
     video.setAttribute('aria-label', post.title);
     article.appendChild(video);
+  } else if (post.kind === 'music' && post.video_path) {
+    var audio = document.createElement('audio');
+    audio.controls = true;
+    audio.preload = 'metadata';
+    audio.src = client.storage.from(MUSIC_BUCKET).getPublicUrl(post.video_path).data.publicUrl;
+    audio.setAttribute('aria-label', post.title);
+    article.appendChild(audio);
   } else if (post.body) {
     var body = document.createElement('p');
     body.textContent = post.body;
@@ -115,6 +134,24 @@ async function loadVideos(client, container) {
     result.data.forEach(function(post) { appendPost(container, post, client); });
   } catch (error) {
     container.textContent = 'Could not load videos: ' + error.message;
+    container.classList.add('error');
+  }
+}
+
+async function loadMusic(client, container) {
+  try {
+    var result = await client.from('content_posts')
+      .select('id, kind, title, author_name, video_path, created_at')
+      .eq('kind', 'music').order('created_at', { ascending: false });
+    if (result.error) throw result.error;
+    container.replaceChildren();
+    if (result.data.length === 0) {
+      container.textContent = 'No music has been uploaded yet.';
+      return;
+    }
+    result.data.forEach(function(post) { appendPost(container, post, client); });
+  } catch (error) {
+    container.textContent = 'Could not load music: ' + error.message;
     container.classList.add('error');
   }
 }
@@ -228,6 +265,57 @@ function wireVideoForm(client, form) {
   });
 }
 
+function wireMusicForm(client, form) {
+  form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    var status = form.querySelector('.form-status');
+    var button = form.querySelector('button[type="submit"]');
+    var title = form.elements.title.value.trim();
+    var authorName = form.elements.author_name.value.trim() || null;
+    var file = form.elements.music.files[0];
+    if (!title || !file) {
+      setStatus(status, 'Enter a song title and choose an audio file.', true);
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(MUSIC_TYPES, file.type)) {
+      setStatus(status, 'Choose an MP3, M4A, OGG, or WAV audio file.', true);
+      return;
+    }
+    if (file.size === 0 || file.size > MUSIC_MAX_BYTES) {
+      setStatus(status, 'The audio file must be larger than 0 bytes and no larger than 20 MB.', true);
+      return;
+    }
+    button.disabled = true;
+    setStatus(status, 'Uploading music…', false);
+    try {
+      var path = 'music/' + crypto.randomUUID() + '.' + MUSIC_TYPES[file.type];
+      var upload = await client.storage.from(MUSIC_BUCKET).upload(path, file, {
+        contentType: file.type,
+        upsert: false
+      });
+      if (upload.error) throw upload.error;
+      var result = await client.from('content_posts').insert({
+        kind: 'music',
+        title: title,
+        author_name: authorName,
+        body: '',
+        video_path: path
+      });
+      if (result.error) {
+        throw new Error('The audio uploaded but its post could not be saved: ' + result.error.message + ' Contact the site administrator to remove the unused upload.');
+      }
+      form.reset();
+      setStatus(status, 'Music uploaded and published successfully.', false);
+      var list = document.querySelector('[data-music-list]');
+      if (list) await loadMusic(client, list);
+    } catch (error) {
+      setStatus(status, 'Could not publish music: ' + error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 function wirePhotoForm(client, form) {
   form.addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -327,8 +415,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  var lists = Array.from(document.querySelectorAll('[data-post-list], [data-video-list], [data-photo-list]'));
-  var forms = Array.from(document.querySelectorAll('[data-post-form], [data-video-form], [data-photo-form]'));
+  var lists = Array.from(document.querySelectorAll('[data-post-list], [data-video-list], [data-music-list], [data-photo-list]'));
+  var forms = Array.from(document.querySelectorAll('[data-post-form], [data-video-form], [data-music-form], [data-photo-form]'));
   if (!lists.length && !forms.length) return;
   var client;
   try {
@@ -346,11 +434,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   lists.forEach(function(list) {
     if (list.hasAttribute('data-video-list')) loadVideos(client, list);
+    else if (list.hasAttribute('data-music-list')) loadMusic(client, list);
     else if (list.hasAttribute('data-photo-list')) loadPhotos(client, list);
     else loadPosts(client, list, list.dataset.postList);
   });
   forms.forEach(function(form) {
     if (form.hasAttribute('data-video-form')) wireVideoForm(client, form);
+    else if (form.hasAttribute('data-music-form')) wireMusicForm(client, form);
     else if (form.hasAttribute('data-photo-form')) wirePhotoForm(client, form);
     else wirePostForm(client, form);
   });
