@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Entertainment — Muchina Family</title>
   <link rel="icon" type="image/svg+xml" href="assets/brain-logo.svg" />
-  <link rel="stylesheet" href="css/style.css?v=7" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
 </head>
 <body>
   <header class="site-header">
@@ -23,7 +23,25 @@
 
   <main class="container">
     <h2>Entertainment</h2>
-    <p>Share family videos and photos. Uploads are published immediately and are publicly viewable.</p>
+    <p>Share family videos, photos, and music. Uploads are published immediately and are publicly viewable.</p>
+    <section class="panel" aria-labelledby="music-upload-heading">
+      <h3 id="music-upload-heading">Upload family music</h3>
+      <p>Share music you created or have permission to publish.</p>
+      <form data-music-form>
+        <label for="music-name">Artist or your name (optional)</label>
+        <input id="music-name" name="author_name" type="text" maxlength="80" />
+        <label for="music-title">Song title</label>
+        <input id="music-title" name="title" type="text" maxlength="120" required />
+        <label for="music-file">Audio file (MP3, M4A, OGG, or WAV; up to 20 MB)</label>
+        <input id="music-file" name="music" type="file" accept=".mp3,.m4a,.ogg,.wav,audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/x-wav" required />
+        <button class="btn" type="submit">Upload and publish music</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="music-list-heading">
+      <h3 id="music-list-heading">Family music</h3>
+      <div data-music-list aria-live="polite"><p>Loading music…</p></div>
+    </section>
     <section class="panel">
       <h3>Post a video</h3>
       <form data-video-form>
