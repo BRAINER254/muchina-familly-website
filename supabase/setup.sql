@@ -22,7 +22,7 @@ alter table public.content_posts add constraint content_posts_media_fields check
 
 create index if not exists content_posts_kind_created_at_idx
   on public.content_posts (kind, created_at desc);
-
+  
 alter table public.content_posts enable row level security;
 
 drop policy if exists "Public can read posts" on public.content_posts;
