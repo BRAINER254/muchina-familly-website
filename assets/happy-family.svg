@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 88" role="img" aria-labelledby="title">
+  <title id="title">Happy family together</title>
+  <path d="M13 78c1-15 10-24 23-24s22 9 23 24" fill="#74c6bd" stroke="#392c70" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <path d="M57 78c1-18 12-29 27-29s26 11 27 29" fill="#f3a05f" stroke="#392c70" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <path d="M34 53c-10 0-17-8-17-19 0-12 8-20 19-20s19 8 19 20c0 11-8 19-17 19z" fill="#9b5b43" stroke="#392c70" stroke-linejoin="round" stroke-width="3"/>
+  <path d="M68 50c-11 0-19-9-19-21 0-13 9-22 20-22s20 9 20 22c0 12-8 21-19 21z" fill="#f2bc8b" stroke="#392c70" stroke-linejoin="round" stroke-width="3"/>
+  <path d="M87 52c-9 0-15-7-15-17 0-11 7-18 16-18s16 7 16 18c0 10-7 17-17 17z" fill="#6b402f" stroke="#392c70" stroke-linejoin="round" stroke-width="3"/>
+  <path d="M22 16c5-9 18-11 27-2l3 7c-8-4-18-5-30-2zM54 15c7-11 23-12 32-1l4 9c-9-5-23-6-38-3zM76 22c6-9 18-10 26-3l3 7c-8-3-18-3-29-1z" fill="#392c70"/>
+  <path d="M28 34h1m14 0h1m14-8h1m15 0h1m-2 17c3 3 7 3 10 0m-50 2c3 3 7 3 10 0m32-1c3 3 7 3 10 0" fill="none" stroke="#392c70" stroke-linecap="round" stroke-width="3"/>
+  <path d="m8 25 2 4 5 2-5 2-2 5-2-5-5-2 5-2zM107 10l2 4 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#ffd46f" stroke="#392c70" stroke-linejoin="round" stroke-width="2"/>
+</svg>
