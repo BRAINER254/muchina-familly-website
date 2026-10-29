@@ -6,9 +6,10 @@ body{font-family:Segoe UI, Roboto, Arial, sans-serif;margin:0;background:var(--b
 .site-header{background:var(--card);border-bottom:1px solid #e4e4e7}
 .site-header .container{display:flex;align-items:center;gap:1rem}
 h1{margin:.5rem 0}
-.site-brand{font-size:1.5rem;white-space:nowrap}
+.site-brand{font-size:1.5rem;white-space:nowrap;flex-shrink:0}
 .site-brand a{display:inline-flex;align-items:center;gap:.55rem;color:inherit;text-decoration:none}
 .site-brand img{display:block;width:2.6rem;height:2.6rem}
+.site-brand .family-logo{width:3.5rem;height:2.6rem;margin-left:.1rem}
 .main-nav{margin-left:auto;display:flex;gap:.75rem}
 .main-nav a{color:var(--accent);text-decoration:none}
 .nav-toggle{display:none;background:transparent;border:0;font-size:1.4rem}
