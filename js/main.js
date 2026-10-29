@@ -77,7 +77,170 @@ function appendPost(container, post, client) {
     metadata.appendChild(document.createTextNode(' · ' + post.author_name));
   }
   article.appendChild(metadata);
+  if (post.kind === 'idea') {
+    appendIdeaDiscussion(article, post, client);
+  }
   container.appendChild(article);
+}
+
+function appendIdeaDiscussion(article, idea, client) {
+  var section = document.createElement('section');
+  section.className = 'idea-discussion';
+  var heading = document.createElement('h5');
+  heading.textContent = 'Comments';
+  section.appendChild(heading);
+
+  var comments = document.createElement('div');
+  comments.className = 'idea-comments';
+  comments.dataset.ideaComments = idea.id;
+  comments.textContent = 'Loading comments…';
+  section.appendChild(comments);
+
+  var form = document.createElement('form');
+  form.className = 'idea-comment-form';
+  form.dataset.ideaCommentForm = idea.id;
+
+  var nameLabel = document.createElement('label');
+  nameLabel.htmlFor = 'comment-name-' + idea.id;
+  nameLabel.textContent = 'Your name (optional)';
+  form.appendChild(nameLabel);
+  var nameInput = document.createElement('input');
+  nameInput.id = nameLabel.htmlFor;
+  nameInput.name = 'author_name';
+  nameInput.type = 'text';
+  nameInput.maxLength = 80;
+  nameInput.autocomplete = 'name';
+  form.appendChild(nameInput);
+
+  var bodyLabel = document.createElement('label');
+  bodyLabel.htmlFor = 'comment-body-' + idea.id;
+  bodyLabel.textContent = 'Add a comment';
+  form.appendChild(bodyLabel);
+  var bodyInput = document.createElement('textarea');
+  bodyInput.id = bodyLabel.htmlFor;
+  bodyInput.name = 'body';
+  bodyInput.rows = 3;
+  bodyInput.maxLength = 1000;
+  bodyInput.required = true;
+  form.appendChild(bodyInput);
+
+  var button = document.createElement('button');
+  button.className = 'btn';
+  button.type = 'submit';
+  button.textContent = 'Post comment';
+  form.appendChild(button);
+  var status = document.createElement('p');
+  status.className = 'form-status';
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  form.appendChild(status);
+
+  form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    var body = bodyInput.value.trim();
+    var authorName = nameInput.value.trim() || null;
+    if (!body) {
+      setStatus(status, 'Please enter a comment.', true);
+      return;
+    }
+    if (body.length > 1000 || (authorName && authorName.length > 80)) {
+      setStatus(status, 'Comments are limited to 1,000 characters and names to 80 characters.', true);
+      return;
+    }
+    button.disabled = true;
+    setStatus(status, 'Posting comment…', false);
+    try {
+      var result = await client.from('idea_comments').insert({
+        idea_id: idea.id,
+        author_name: authorName,
+        body: body
+      });
+      if (result.error) throw result.error;
+      form.reset();
+      setStatus(status, 'Comment posted.', false);
+      await loadIdeaComments(client, idea.id, comments);
+    } catch (error) {
+      setStatus(status, 'Could not post comment: ' + error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  section.appendChild(form);
+  article.appendChild(section);
+}
+
+function renderIdeaComment(container, comment) {
+  var article = document.createElement('article');
+  article.className = 'idea-comment';
+  var body = document.createElement('p');
+  body.textContent = comment.body;
+  article.appendChild(body);
+
+  var metadata = document.createElement('p');
+  metadata.className = 'post-meta';
+  var time = document.createElement('time');
+  time.dateTime = comment.created_at;
+  time.textContent = new Date(comment.created_at).toLocaleString();
+  metadata.appendChild(time);
+  metadata.appendChild(document.createTextNode(' · ' + (comment.author_name || 'Family member')));
+  article.appendChild(metadata);
+  container.appendChild(article);
+}
+
+async function loadIdeaComments(client, ideaId, container) {
+  try {
+    var result = await client.from('idea_comments')
+      .select('id, idea_id, author_name, body, created_at')
+      .eq('idea_id', ideaId).order('created_at', { ascending: true });
+    if (result.error) throw result.error;
+    container.replaceChildren();
+    if (result.data.length === 0) {
+      container.textContent = 'No comments yet. Start the conversation.';
+      return;
+    }
+    result.data.forEach(function(comment) { renderIdeaComment(container, comment); });
+  } catch (error) {
+    container.textContent = 'Could not load comments: ' + error.message;
+    container.classList.add('error');
+  }
+}
+
+async function loadIdeaCommentsForPosts(client, ideas) {
+  if (ideas.length === 0) return;
+  var ideaIds = ideas.map(function(idea) { return idea.id; });
+  var containers = new Map(Array.from(document.querySelectorAll('[data-idea-comments]'))
+    .map(function(container) { return [container.dataset.ideaComments, container]; }));
+  try {
+    var result = await client.from('idea_comments')
+      .select('id, idea_id, author_name, body, created_at')
+      .in('idea_id', ideaIds).order('created_at', { ascending: true });
+    if (result.error) throw result.error;
+    var commentsByIdea = new Map();
+    result.data.forEach(function(comment) {
+      if (!commentsByIdea.has(comment.idea_id)) commentsByIdea.set(comment.idea_id, []);
+      commentsByIdea.get(comment.idea_id).push(comment);
+    });
+    ideaIds.forEach(function(ideaId) {
+      var container = containers.get(ideaId);
+      if (!container) return;
+      container.replaceChildren();
+      var comments = commentsByIdea.get(ideaId) || [];
+      if (comments.length === 0) {
+        container.textContent = 'No comments yet. Start the conversation.';
+      } else {
+        comments.forEach(function(comment) { renderIdeaComment(container, comment); });
+      }
+    });
+  } catch (error) {
+    ideaIds.forEach(function(ideaId) {
+      var container = containers.get(ideaId);
+      if (container) {
+        container.textContent = 'Could not load comments: ' + error.message;
+        container.classList.add('error');
+      }
+    });
+  }
 }
 
 function appendPhoto(container, post, client) {
@@ -114,6 +277,7 @@ async function loadPosts(client, container, kind) {
       return;
     }
     result.data.forEach(function(post) { appendPost(container, post, client); });
+    if (kind === 'idea') await loadIdeaCommentsForPosts(client, result.data);
   } catch (error) {
     container.textContent = 'Could not load content: ' + error.message;
     container.classList.add('error');
