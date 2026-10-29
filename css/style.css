@@ -49,3 +49,13 @@ button{font:inherit}
 .lightbox img{max-width:90%;max-height:80%;border-radius:6px}
 .close{position:absolute;top:1rem;right:1rem;background:#fff;border:0;padding:.5rem;border-radius:50%}
 @media(max-width:700px){.main-nav{display:none}.nav-toggle{display:block;margin-left:auto}}
+.entertainment-page{background:linear-gradient(135deg,#eaf4ff 0%,#f2f7ff 58%,#e0edff 100%)}
+.entertainment-page .site-header:after{background:linear-gradient(90deg,#2563eb,#38bdf8,#1d4ed8)}
+.entertainment-page .main-nav a[aria-current=page]{color:#93c5fd}
+.entertainment-page .main-nav a:hover,.entertainment-page .main-nav a:focus-visible{color:#bfdbfe}
+.entertainment-page main>h2{color:#174ea6}
+.entertainment-page .panel,.entertainment-page .panel:nth-of-type(3n),.entertainment-page .panel:nth-of-type(3n + 1){border-top-color:#2563eb}
+.entertainment-page .panel{border-color:#c8daf5}
+.entertainment-page .btn{background:#2563eb}
+.entertainment-page .btn:hover,.entertainment-page .btn:focus-visible{background:#1d4ed8;outline-color:#bfdbfe}
+.entertainment-page input:focus,.entertainment-page textarea:focus{border-color:#2563eb;outline-color:#bfdbfe}
