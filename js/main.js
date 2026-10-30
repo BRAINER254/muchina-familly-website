@@ -546,6 +546,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (slideshow) {
     var slides = slideshow.querySelectorAll('.site-slideshow__image');
     var backgrounds = [
+      'assets/slideshow-upload-01.jpg',
+      'assets/slideshow-upload-02.jpg',
+      'assets/slideshow-upload-03.jpg',
+      'assets/slideshow-upload-04.jpg',
+      'assets/slideshow-upload-05.jpg',
+      'assets/slideshow-upload-06.jpg',
+      'assets/slideshow-upload-07.jpg',
+      'assets/slideshow-upload-08.jpg',
+      'assets/slideshow-upload-09.jpg',
       'assets/slideshow-portrait.png',
       'assets/home-portrait.jpg'
     ];
