@@ -1,6 +1,6 @@
 Muchina Family — Static Website
 
-This static site uses Supabase to publish announcements and ideas, comment on ideas, and upload and display family videos, photos, and music. Posts and comments appear immediately and are publicly readable. The site background rotates through remotely hosted Unsplash family photos; images require an internet connection and are decorative, with a color fallback if unavailable. No server or build step is required.
+This static site uses Supabase to publish announcements and ideas, comment on ideas, and upload and display family videos, photos, and music. Posts and comments appear immediately and are publicly readable. The site background slideshow uses the portraits provided for the site, stored locally in `assets/`; the photos are decorative, with a color fallback if they cannot load. No server or build step is required.
 
 ## Set up Supabase
 

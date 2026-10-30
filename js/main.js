@@ -546,9 +546,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if (slideshow) {
     var slides = slideshow.querySelectorAll('.site-slideshow__image');
     var backgrounds = [
-      'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1600&q=75',
-      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1600&q=75',
-      'https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=1600&q=75'
+      'assets/slideshow-portrait.png',
+      'assets/home-portrait.jpg'
     ];
     var activeSlide = 0;
     var nextBackground = 0;
