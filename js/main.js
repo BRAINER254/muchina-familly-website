@@ -542,6 +542,68 @@ function wirePhotoForm(client, form) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  var slideshow = document.querySelector('[data-site-slideshow]');
+  if (slideshow) {
+    var slides = slideshow.querySelectorAll('.site-slideshow__image');
+    var backgrounds = [
+      'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1600&q=75',
+      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1600&q=75',
+      'https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=1600&q=75'
+    ];
+    var activeSlide = 0;
+    var nextBackground = 0;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var slideshowToggle = document.querySelector('[data-slideshow-toggle]');
+    var slideshowTimer;
+    var paused = reducedMotion;
+
+    function showNextBackground() {
+      var source = backgrounds[nextBackground];
+      nextBackground = (nextBackground + 1) % backgrounds.length;
+      var image = new Image();
+      image.onload = function() {
+        var nextSlide = 1 - activeSlide;
+        slides[nextSlide].style.backgroundImage = 'url("' + source + '")';
+        slides[nextSlide].classList.add('is-visible');
+        slides[activeSlide].classList.remove('is-visible');
+        activeSlide = nextSlide;
+      };
+      image.src = source;
+    }
+
+    function pauseSlideshow() {
+      paused = true;
+      window.clearInterval(slideshowTimer);
+      if (slideshowToggle) {
+        slideshowToggle.textContent = 'Play background photos';
+        slideshowToggle.setAttribute('aria-pressed', 'true');
+      }
+    }
+
+    function playSlideshow() {
+      paused = false;
+      showNextBackground();
+      slideshowTimer = window.setInterval(showNextBackground, 8000);
+      if (slideshowToggle) {
+        slideshowToggle.textContent = 'Pause background photos';
+        slideshowToggle.setAttribute('aria-pressed', 'false');
+      }
+    }
+
+    showNextBackground();
+    if (reducedMotion) {
+      pauseSlideshow();
+    } else {
+      slideshowTimer = window.setInterval(showNextBackground, 8000);
+    }
+    if (slideshowToggle) {
+      slideshowToggle.addEventListener('click', function() {
+        if (paused) playSlideshow();
+        else pauseSlideshow();
+      });
+    }
+  }
+
   var navToggle = document.getElementById('navToggle');
   var mainNav = document.getElementById('mainNav');
   if (navToggle && mainNav) {

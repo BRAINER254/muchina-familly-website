@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Muchina Family</title>
   <link rel="icon" type="image/svg+xml" href="assets/brain-logo.svg" />
-  <link rel="stylesheet" href="css/style.css?v=7" />
+  <link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body>
+  <div class="site-slideshow" data-site-slideshow aria-hidden="true">
+    <div class="site-slideshow__image"></div>
+    <div class="site-slideshow__image"></div>
+  </div>
+  <button class="slideshow-toggle" type="button" data-slideshow-toggle aria-pressed="false">Pause background photos</button>
   <header class="site-header">
     <div class="container">
       <h1 class="site-brand"><a href="index.html"><img src="assets/brain-logo.svg" alt="" />Muchina Family<img class="family-logo" src="assets/happy-family.svg" alt="" /></a></h1>
@@ -61,6 +66,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=slideshow1"></script>
 </body>
 </html>
